@@ -50,7 +50,7 @@ def build_dataset_for_race(year, round_num):
 # %%cell 3
 all_data = []
 
-for year in [2021, 2022, 2023]:
+for year in [2020, 2021, 2022, 2023, 2024, 2025]:
     for round_num in range(1, 23):  # max rounds per season
         try:
             df = build_dataset_for_race(year, round_num)
@@ -63,6 +63,7 @@ full_df.to_csv("f1_pitstop_dataset.csv", index=False)
 
 # %%cell 4
 df = pd.read_csv("f1_pitstop_dataset.csv")
+print(len(df))
 
 # Encode compound type
 df["compound"] = df["compound"].astype("category").cat.codes
@@ -70,7 +71,8 @@ df["compound"] = df["compound"].astype("category").cat.codes
 # Normalize lap_time and tyre_age
 df["lap_time"] = df["lap_time"] / df["lap_time"].max()
 df["tyre_age"] = df["tyre_age"] / df["tyre_age"].max()
+df["is_pit"] = df["is_pit"].astype(int)
+df["driver"] = df["driver"].astype("category").cat.codes
 
-# Drop non-numeric fields for now
-X = df[["lap_number", "compound", "tyre_age", "track_status", "position", "lap_time"]]
-y = df["will_pit_next_lap"]
+# Save the processed dataset
+df.to_csv("f1_pitstop_dataset_processed.csv", index=False)
