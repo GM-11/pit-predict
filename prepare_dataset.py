@@ -40,6 +40,7 @@ def build_dataset_for_race(year, round_num):
                 "position": current_lap["Position"],
                 "lap_time": current_lap["LapTime"].total_seconds(),
                 "will_pit_next_lap": int(next_lap["PitInTime"] is not pd.NaT),
+                "track": session.event["EventName"],
             }
 
             dataset.append(row)
@@ -50,8 +51,8 @@ def build_dataset_for_race(year, round_num):
 # %%cell 3
 all_data = []
 
-for year in [2020, 2021, 2022, 2023, 2024, 2025]:
-    for round_num in range(1, 23):  # max rounds per season
+for year in range(2018, 2026):
+    for round_num in range(1, 24):  # max rounds per season
         try:
             df = build_dataset_for_race(year, round_num)
             all_data.append(df)
@@ -73,6 +74,7 @@ df["lap_time"] = df["lap_time"] / df["lap_time"].max()
 df["tyre_age"] = df["tyre_age"] / df["tyre_age"].max()
 df["is_pit"] = df["is_pit"].astype(int)
 df["driver"] = df["driver"].astype("category").cat.codes
+df["track"] = df["track"].astype("category").cat.codes
 
 # Save the processed dataset
 df.to_csv("f1_pitstop_dataset_processed.csv", index=False)
