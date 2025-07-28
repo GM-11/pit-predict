@@ -1,6 +1,7 @@
 # %%cell 1
 import torch
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 
@@ -18,6 +19,8 @@ print(df.isna().sum())
 df = df.dropna()
 print("NaN values after dropping rows:")
 print(df.isna().sum())
+# %%cell 11
+df["will_pit_next_lap"].value_counts()
 
 
 # %%cell 5
@@ -49,30 +52,33 @@ y_test_tensor = torch.tensor(y_test.values, dtype=torch.float32)
 class PitstopModel(torch.nn.Module):
     def __init__(self, input_size):
         super(PitstopModel, self).__init__()
-        self.fc1 = torch.nn.Linear(input_size, 64)
-        self.fc2 = torch.nn.Linear(64, 32)
-        self.fc3 = torch.nn.Linear(32, 1)
-        self.relu = torch.nn.ReLU()
-        self.sigmoid = torch.nn.Sigmoid()
+        self.network = torch.nn.Sequential(
+            torch.nn.Linear(input_size, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 32),
+            torch.nn.ReLU(),
+            torch.nn.Linear(32, 16),
+            torch.nn.ReLU(),
+            torch.nn.Linear(16, 1),
+        )
 
     def forward(self, x):
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.sigmoid(self.fc3(x))
-        return x.squeeze()  # Ensure output is 1D tensor
+        return self.network(x)
 
 
 # %%cell 7
-criterion = torch.nn.BCELoss()
+# Calculate class weights to handle imbalance
+pos_weight = torch.tensor([len(y_train[y_train == 0]) / len(y_train[y_train == 1])])
+criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 model = PitstopModel(X_train_tensor.shape[1])
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # %%cell 8
-epochs = 150
+epochs = 600
 for epoch in range(epochs):
     y_pred = model(X_train_tensor)
 
-    loss = criterion(y_pred, y_train_tensor)
+    loss = criterion(y_pred.squeeze(), y_train_tensor)
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
@@ -81,9 +87,10 @@ for epoch in range(epochs):
         print(f"Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}")
 
 # %%cell 9
+
 with torch.no_grad():
     y_pred = model(X_test_tensor)
-    y_pred_binary = (y_pred > 0.5).float()  # Convert probabilities
+    y_pred_binary = (y_pred.squeeze() > 0.5).float()  # Convert probabilities
 
     # Convert tensors to numpy for sklearn metrics
     y_pred_np = y_pred_binary.numpy()
@@ -99,9 +106,13 @@ with torch.no_grad():
     )
 
     accuracy = accuracy_score(y_test_np, y_pred_np)
-    precision = precision_score(y_test_np, y_pred_np)
-    recall = recall_score(y_test_np, y_pred_np)
-    f1 = f1_score(y_test_np, y_pred_np)
+    precision = precision_score(
+        y_test_np, y_pred_np, average="weighted", labels=np.unique(y_pred)
+    )
+    recall = recall_score(
+        y_test_np, y_pred_np, average="weighted", labels=np.unique(y_pred)
+    )
+    f1 = f1_score(y_test_np, y_pred_np, average="weighted", labels=np.unique(y_pred))
     cm = confusion_matrix(y_test_np, y_pred_np)
 
     # Print metrics
