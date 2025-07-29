@@ -25,7 +25,6 @@ def load_model():
         model_path = "./model/pitstopmodel.pth"
         if os.path.exists(model_path):
             checkpoint = torch.load(model_path, map_location="cpu")
-            print(checkpoint)
 
             # Detect input size from the first layer
             if "network.0.weight" in checkpoint:
