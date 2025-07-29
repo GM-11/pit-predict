@@ -80,14 +80,14 @@ def test_model(model, scaler):
         sample_data = [16, 25, 4, 15, 0, 0, 5, 85.5, 2]  # Regular values
 
         # Use the predict_pitstop function to test
-        probability, prediction = predict_pitstop(model, scaler, sample_data, 0.3)
+        probability, prediction = predict_pitstop(model, scaler, sample_data, 0.4)
 
         return True, probability
     except Exception as e:
         return False, str(e)
 
 
-def predict_pitstop(model, scaler, input_data, threshold=0.3):
+def predict_pitstop(model, scaler, input_data, threshold=0.4):
     """Make pitstop prediction"""
     try:
         # Define feature names to match the scaler
@@ -341,7 +341,7 @@ def main():
         )  # Divide by max lap_time from training data
 
     # Set optimal threshold as constant
-    threshold = 0.3  # Optimal threshold from model evaluation
+    threshold = 0.4  # Optimal threshold from model evaluation
 
     # Prepare input data in the same order as training
     # Features: [driver, lap_number, compound, tyre_age, track_status, is_pit, position, lap_time, track]
@@ -385,9 +385,9 @@ def main():
         with col3:
             confidence = (
                 "High"
-                if abs(probability - 0.3) > 0.2
+                if abs(probability - 0.4) > 0.2
                 else "Medium"
-                if abs(probability - 0.3) > 0.1
+                if abs(probability - 0.4) > 0.1
                 else "Low"
             )
             st.metric("Confidence", confidence)
@@ -399,20 +399,20 @@ def main():
                 value=probability * 100,
                 domain={"x": [0, 1], "y": [0, 1]},
                 title={"text": "Pit Probability (%)"},
-                delta={"reference": 30},  # Updated to show difference from threshold
+                delta={"reference": 40},  # Updated to show difference from threshold
                 gauge={
                     "axis": {"range": [None, 100]},
                     "bar": {"color": "red" if prediction == 1 else "green"},
                     "steps": [
-                        {"range": [0, 15], "color": "lightgreen"},
-                        {"range": [15, 30], "color": "yellow"},
-                        {"range": [30, 60], "color": "orange"},
-                        {"range": [60, 100], "color": "red"},
+                        {"range": [0, 20], "color": "lightgreen"},
+                        {"range": [20, 40], "color": "yellow"},
+                        {"range": [40, 70], "color": "orange"},
+                        {"range": [70, 100], "color": "red"},
                     ],
                     "threshold": {
                         "line": {"color": "black", "width": 4},
                         "thickness": 0.75,
-                        "value": 30,  # Updated threshold line
+                        "value": 40,  # Updated threshold line
                     },
                 },
             )
@@ -473,10 +473,11 @@ def main():
     with col2:
         st.info("""
         **Model Performance:**
-        - Optimal Threshold: 30%
-        - Enhanced Feature Weighting
-        - Trained on F1 2017-2025 data
-        - Real-time predictions
+        - Optimal Threshold: 40%
+        - Accuracy: 80.34%
+        - Precision: 63.14%
+        - Recall: 74.56%
+        - F1 Score: 68.38%
         """)
 
     with col3:
