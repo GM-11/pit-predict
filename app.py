@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
 from model_definition import PitstopModel
+from mappings import track_mapping, driver_mapping, compound_mapping
 
 # Configure page
 st.set_page_config(
@@ -28,6 +29,7 @@ def load_model():
         model_path = "./model/pitstopmodel.pth"
         if os.path.exists(model_path):
             checkpoint = torch.load(model_path, map_location="cpu")
+            print(checkpoint)
 
             # Detect input size from the first layer
             if "network.0.weight" in checkpoint:
@@ -49,7 +51,7 @@ def load_model():
             # Load scaler
             from sklearn.preprocessing import MinMaxScaler
 
-            scaler_path = "model/scaler.pkl"
+            scaler_path = "./model/scaler.pkl"
             try:
                 import joblib
 
@@ -146,101 +148,6 @@ def main():
     st.markdown("---")
 
     # Define mappings for categorical variables
-    compound_mapping = {
-        0: "HARD",
-        1: "HYPERSOFT",
-        2: "INTERMEDIATE",
-        3: "MEDIUM",
-        4: "SOFT",
-        5: "SUPERSOFT",
-        6: "ULTRASOFT",
-        7: "WET",
-    }
-
-    driver_mapping = {
-        0: "AIT",
-        1: "ALB",
-        2: "ALO",
-        3: "ANT",
-        4: "BEA",
-        5: "BOR",
-        6: "BOT",
-        7: "COL",
-        8: "DEV",
-        9: "DOO",
-        10: "ERI",
-        11: "FIT",
-        12: "GAS",
-        13: "GIO",
-        14: "GRO",
-        15: "HAD",
-        16: "HAM",
-        17: "HAR",
-        18: "HUL",
-        19: "KUB",
-        20: "KVY",
-        21: "LAT",
-        22: "LAW",
-        23: "LEC",
-        24: "MAG",
-        25: "MAZ",
-        26: "MSC",
-        27: "NOR",
-        28: "OCO",
-        29: "PER",
-        30: "PIA",
-        31: "RAI",
-        32: "RIC",
-        33: "RUS",
-        34: "SAI",
-        35: "SAR",
-        36: "SIR",
-        37: "STR",
-        38: "TSU",
-        39: "VAN",
-        40: "VER",
-        41: "VET",
-        42: "ZHO",
-    }
-
-    track_mapping = {
-        0: "70th Anniversary Grand Prix",
-        1: "Abu Dhabi Grand Prix",
-        2: "Australian Grand Prix",
-        3: "Austrian Grand Prix",
-        4: "Azerbaijan Grand Prix",
-        5: "Bahrain Grand Prix",
-        6: "Belgian Grand Prix",
-        7: "Brazilian Grand Prix",
-        8: "British Grand Prix",
-        9: "Canadian Grand Prix",
-        10: "Chinese Grand Prix",
-        11: "Dutch Grand Prix",
-        12: "Eifel Grand Prix",
-        13: "Emilia Romagna Grand Prix",
-        14: "French Grand Prix",
-        15: "German Grand Prix",
-        16: "Hungarian Grand Prix",
-        17: "Italian Grand Prix",
-        18: "Japanese Grand Prix",
-        19: "Las Vegas Grand Prix",
-        20: "Mexican Grand Prix",
-        21: "Mexico City Grand Prix",
-        22: "Miami Grand Prix",
-        23: "Monaco Grand Prix",
-        24: "Portuguese Grand Prix",
-        25: "Qatar Grand Prix",
-        26: "Russian Grand Prix",
-        27: "Sakhir Grand Prix",
-        28: "Saudi Arabian Grand Prix",
-        29: "Singapore Grand Prix",
-        30: "Spanish Grand Prix",
-        31: "Styrian Grand Prix",
-        32: "São Paulo Grand Prix",
-        33: "Turkish Grand Prix",
-        34: "Tuscan Grand Prix",
-        35: "United States Grand Prix",
-    }
 
     # Create reverse mappings for lookups
     compound_reverse = {v: k for k, v in compound_mapping.items()}
@@ -474,10 +381,10 @@ def main():
         st.info("""
         **Model Performance:**
         - Optimal Threshold: 40%
-        - Accuracy: 80.34%
-        - Precision: 63.14%
-        - Recall: 74.56%
-        - F1 Score: 68.38%
+        - Accuracy: 80.19%
+        - Precision: 62.82%
+        - Recall: 74.80%
+        - F1 Score: 68.29%
         """)
 
     with col3:
