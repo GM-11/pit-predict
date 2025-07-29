@@ -1,9 +1,16 @@
-torch>=2.0.0
-streamlit>=1.28.0
+# Core libraries
+torch==2.2.2          # Use CPU-compatible PyTorch version
+torchvision==0.17.2   # Required for image-related tasks
+torchaudio==2.2.2     # Optional: remove if not used
+
+# App and plotting
+streamlit==1.35.0
+plotly>=5.15.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Data handling and ML
 pandas>=1.5.0
 numpy>=1.21.0
 scikit-learn>=1.3.0
-plotly>=5.15.0
 joblib>=1.3.0
-matplotlib>=3.5.0
-seaborn>=0.11.0
