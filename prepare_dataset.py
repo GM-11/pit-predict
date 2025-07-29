@@ -51,7 +51,7 @@ def build_dataset_for_race(year, round_num):
 # %%cell 3
 all_data = []
 
-for year in range(2018, 2026):
+for year in range(2017, 2026):
     for round_num in range(1, 24):  # max rounds per season
         try:
             df = build_dataset_for_race(year, round_num)
