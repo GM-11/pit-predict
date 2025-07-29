@@ -2,10 +2,8 @@ import streamlit as st
 import torch
 import pandas as pd
 import numpy as np
-import joblib
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import os
 from model_definition import PitstopModel
 from mappings import track_mapping, driver_mapping, compound_mapping
@@ -20,8 +18,6 @@ st.set_page_config(
 
 
 # Import the model class
-
-
 @st.cache_resource
 def load_model():
     """Load the trained model with automatic feature detection"""
@@ -105,8 +101,12 @@ def predict_pitstop(model, scaler, input_data, threshold=0.4):
             "track",
         ]
 
-        # Convert input to DataFrame to avoid sklearn warning
-        input_df = pd.DataFrame([input_data], columns=feature_names)
+        # Convert input to DataFrame with correct column specification
+        input_df = pd.DataFrame([input_data])
+
+        # Only assign column names if the dimensions match
+        if len(input_df.columns) == len(feature_names):
+            input_df.columns = feature_names
 
         # Apply scaler normalization
         input_scaled = scaler.transform(input_df)
@@ -132,20 +132,13 @@ def predict_pitstop(model, scaler, input_data, threshold=0.4):
         return 0.0, 0
 
 
-@st.cache_data
-def load_sample_data():
-    """Load sample data for visualization"""
-    try:
-        df = pd.read_csv("f1_pitstop_dataset_processed.csv")
-        return df.head(1000)  # Return first 1000 rows for performance
-    except:
-        return None
-
-
 def main():
     # Header
     st.title("🏎️ F1 Pitstop Prediction Model")
     st.markdown("---")
+    st.write(
+        "All predictions are assuming dry race conditions and no safety car. This model will be updated further to accomodate for these conditions in the future."
+    )
 
     # Define mappings for categorical variables
 
@@ -168,10 +161,6 @@ def main():
     if not model_works:
         st.error(f"❌ Model test failed: {test_result}")
         st.stop()
-
-    # Sidebar for input
-    st.sidebar.header("🔧 Race Parameters")
-    st.sidebar.markdown("Enter the current race conditions:")
 
     # Input fields based on the dataset columns
     col1, col2 = st.columns(2)
@@ -395,25 +384,6 @@ def main():
         - Track position (weighted 1.2x)
         - Track conditions & compound
         """)
-
-    # Sample data exploration
-    sample_data = load_sample_data()
-    if sample_data is not None:
-        st.markdown("---")
-        st.subheader("📈 Sample Race Data")
-
-        # Show distribution of pit stops
-        pit_counts = sample_data["will_pit_next_lap"].value_counts()
-        fig = px.pie(
-            values=pit_counts.values,
-            names=["No Pit", "Pit"],
-            title="Distribution of Pit Decisions in Sample Data",
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Show sample data
-        if st.checkbox("Show Sample Data"):
-            st.dataframe(sample_data)
 
     # Footer
     st.markdown("---")
